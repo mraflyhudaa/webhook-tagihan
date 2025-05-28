@@ -9,7 +9,7 @@ const subscriptionDates = [
 ];
 
 subscriptionDates.forEach((billingDate) => {
-  const cronExpression = `31 14 ${billingDate} * *`;
+  const cronExpression = `0 1 ${billingDate} * *`;
 
   cron.schedule(
     cronExpression,
