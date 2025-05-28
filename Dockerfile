@@ -1,26 +1,28 @@
-FROM node:18-alpine
+FROM node:18-alpine as builder
 
-# Create app directory
 WORKDIR /usr/src/app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
 
-# Copy package files
-COPY package*.json pnpm-lock.yaml ./
+RUN corepack enable && \
+    corepack prepare pnpm@latest --activate && \
+    pnpm install --frozen-lockfile
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
-# Bundle app source
 COPY . .
 
-# Set timezone
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/src ./src
+COPY --from=builder /usr/src/app/package.json .
+
 ENV TZ=Asia/Jakarta
 RUN apk add --no-cache tzdata
 
-# Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-CMD [ "node", "index.js" ]
+CMD [ "node", "src/index.js" ]

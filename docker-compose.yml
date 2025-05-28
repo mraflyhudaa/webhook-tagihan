@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   bot:
     build: .
@@ -11,6 +9,8 @@ services:
       - TZ=Asia/Jakarta
     volumes:
       - ./logs:/usr/src/app/logs
+    ports:
+      - '3000:3000'
     healthcheck:
       test:
         [
